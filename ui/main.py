@@ -7,6 +7,9 @@ import requests
 import threading
 
 
+platform_id = os.environ["PLATFORM_ID"]  # get platform type
+
+
 class Envs:
     def __init__(self):
         self.CIVITAI_TOKEN = ""
@@ -147,7 +150,7 @@ def completed_message():
 
 def select_pretrained_model():
     checkboxes = []
-    models_header = widgets.HTML('<h3 style="width: 200px;">Models Name</h3>')
+    models_header = widgets.HTML('<h3 style="width: 200px;">Pretrained Model List</h3>')
     headers = widgets.HBox([models_header])
     display(headers)
     get_model = get_model_list()
@@ -189,7 +192,7 @@ def select_pretrained_model():
 
 def select_clip_vae_model():
     checkboxes = []
-    models_header = widgets.HTML('<h3 style="width: 200px;">Models Name</h3>')
+    models_header = widgets.HTML('<h3 style="width: 200px;">VAE/CLIP Model List</h3>')
     headers = widgets.HBox([models_header])
     display(headers)
     get_model = get_clip_list()
@@ -230,37 +233,66 @@ def select_clip_vae_model():
 
 
 def launch_kohya_ss():
-    command = "python -u kohya_gui.py --noverify --headless --listen=0.0.0.0"
-    os.chdir("kohya_ss/")  # Change to the kohya_ss directory
 
-    try:
-        # Start the subprocess with unbuffered output
-        process = subprocess.Popen(
-            shlex.split(command),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,  # Line buffering
-        )
+    models_header = widgets.HTML(
+        '<h3 style="width: 200px;">เริ่มโปรแกรม Kohya-SS GUI ตรงนี้</h3>'
+    )
+    headers = widgets.HBox([models_header])
+    display(headers)
 
-        # Function to read and print subprocess output in real-time
-        def print_output():
-            for line in iter(process.stdout.readline, ""):
-                if line:
-                    print(line.strip(), flush=True)
-            process.stdout.close()
+    def run_gui(button):
+        command = "python -u kohya_gui.py --noverify --headless --listen=0.0.0.0"
 
-        # Start the output thread
-        output_thread = threading.Thread(target=print_output)
-        output_thread.daemon = True
-        output_thread.start()
+        if platform_id == "RUNPOD":
+            proxy_url = f'URL : https://{os.environ.get("RUNPOD_POD_ID")}-{7860}.proxy.runpod.net'
+        elif platform_id == "PAPERSPACE":
+            proxy_url = f'URL : https://tensorboard-{os.environ.get("PAPERSPACE_FQDN")}'
+        else:
+            proxy_url = f"using gradio share url"
+            command += " --share"
 
-        # Wait for the subprocess to complete
-        process.wait()
-        output_thread.join()
+        os.chdir("kohya_ss/")  # Change to the kohya_ss directory
 
-    except KeyboardInterrupt:
-        process.terminate()
-        print("\n--Process terminated--")
-    finally:
-        os.chdir("/notebooks/")  # Restore the working directory
+        try:
+            # Start the subprocess with unbuffered output
+            process = subprocess.Popen(
+                shlex.split(command),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,  # Line buffering
+            )
+
+            # Function to read and print subprocess output in real-time
+            def print_output():
+                for line in iter(process.stdout.readline, ""):
+                    if line:
+                        print(line.strip(), flush=True)
+                process.stdout.close()
+
+            # Start the output thread
+            output_thread = threading.Thread(target=print_output)
+            output_thread.daemon = True
+            output_thread.start()
+
+            with output:
+                print("kohya-ss GUI has been started see logs at console")
+                print(proxy_url)
+
+            # Wait for the subprocess to complete
+            process.wait()
+            output_thread.join()
+
+        except KeyboardInterrupt:
+            process.terminate()
+            print("\n--Process terminated--")
+        finally:
+            os.chdir("/notebooks/")  # Restore the working directory
+
+    start_button = widgets.Button(
+        description="START kohya-ss GUI", button_style="primary"
+    )
+    output = widgets.Output()
+    start_button.on_click(run_gui)
+
+    display(start_button, output)
