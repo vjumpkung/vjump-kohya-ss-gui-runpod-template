@@ -7,7 +7,12 @@ import requests
 import threading
 
 
-platform_id = os.environ["PLATFORM_ID"]  # get platform type
+platform_id = "OTHER"
+
+if "RUNPOD_POD_ID" in os.environ.keys():
+    platform_id = "RUNPOD"
+elif "PAPERSPACE_FQDN" in os.environ.keys():
+    platform_id = "PAPERSPACE"
 
 
 class Envs:
@@ -239,6 +244,7 @@ def launch_kohya_ss():
     )
     headers = widgets.HBox([models_header])
     display(headers)
+    output = widgets.Output()
 
     def run_gui(button):
         command = "python -u kohya_gui.py --noverify --headless --listen=0.0.0.0"
@@ -292,7 +298,7 @@ def launch_kohya_ss():
     start_button = widgets.Button(
         description="START kohya-ss GUI", button_style="primary"
     )
-    output = widgets.Output()
+
     start_button.on_click(run_gui)
 
     display(start_button, output)
