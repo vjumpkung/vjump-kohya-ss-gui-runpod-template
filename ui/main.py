@@ -4,7 +4,6 @@ import subprocess
 import os
 import shlex
 import requests
-import threading
 
 
 platform_id = "OTHER"
@@ -101,48 +100,44 @@ def download(name: str, url: str, type: str):
 
     print(f"Starting download: {name}")
 
+    if envs.CIVITAI_TOKEN != "":
+        if "?" in url:
+            url += f"&token={envs.CIVITAI_TOKEN}"
+        else:
+            url += f"?token={envs.CIVITAI_TOKEN}"
+
+    if envs.HUGGINGFACE_TOKEN != "":
+        command += f' --header="Authorization: Bearer {envs.HUGGINGFACE_TOKEN}"'
+
+    command = f"aria2c --console-log-level=error -c -x 16 -s 16 -k 1M {url} --dir={destination} --download-result=hide"
+
+    if "huggingface" in url:
+        command += f' -o {url.split("/")[-1]}'
+
     if "civitai" in url:
-        if envs.CIVITAI_TOKEN != "":
-            if "?" in url:
-                url += f"&token={envs.CIVITAI_TOKEN}"
+        command += " --content-disposition=true"
+
+    with subprocess.Popen(
+        shlex.split(command),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    ) as sp:
+        print("\033[?25l", end="")
+        for line in sp.stdout:
+            if line.startswith("[#"):
+                text = "Download progress {}".format(line.strip("\n"))
+                print("\r" + " " * 100 + "\r" + text, end="", flush=True)
+                prev_line = text
+            elif line.startswith("[COMPLETED]"):
+                if prev_line != "":
+                    print("", flush=True)
             else:
-                url += f"?token={envs.CIVITAI_TOKEN}"
+                print(line.strip(), end="", flush=True)
+        print("\033[?25h")
 
-        command = f"aria2c --console-log-level=error -c -x 16 -s 16 -k 1M {url} --dir={destination} --content-disposition=true --download-result=hide {url}"
-
-        with subprocess.Popen(
-            shlex.split(command),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-        ) as sp:
-            print("\033[?25l", end="")  # Hide cursor
-            for line in sp.stdout:
-                print(f"\r{line.strip()}", end="", flush=True)
-            print("\033[?25h")  # Show cursor
-
-    elif "huggingface" in url:
-        command = (
-            f"wget -q --show-progress --content-disposition {url} -P {destination}"
-        )
-
-        if envs.HUGGINGFACE_TOKEN != "":
-            command += f' --header="Authorization: Bearer {envs.HUGGINGFACE_TOKEN}"'
-
-        with subprocess.Popen(
-            shlex.split(command),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-        ) as sp:
-            print("\033[?25l", end="")  # Hide cursor
-            for line in sp.stdout:
-                print(f"\r{line.strip()}", end="", flush=True)
-            print("\033[?25h")  # Show cursor
-
-    print(f"\nDownload completed: {name}")
+    print(f"Download completed: {name}")
 
 
 def completed_message():
@@ -240,10 +235,9 @@ def select_clip_vae_model():
 def launch_kohya_ss():
 
     models_header = widgets.HTML(
-        '<h3 style="width: 200px;">เริ่มโปรแกรม Kohya-SS GUI ตรงนี้</h3>'
+        '<h3 style="width: 250px;">เริ่มโปรแกรม Kohya-SS GUI ตรงนี้</h3>'
     )
-    headers = widgets.HBox([models_header])
-    display(headers)
+    display(models_header)
     output = widgets.Output()
 
     def run_gui(button):
@@ -269,29 +263,26 @@ def launch_kohya_ss():
                 bufsize=1,  # Line buffering
             )
 
-            # Function to read and print subprocess output in real-time
-            def print_output():
-                for line in iter(process.stdout.readline, ""):
-                    if line:
-                        print(line.strip(), flush=True)
-                process.stdout.close()
-
-            # Start the output thread
-            output_thread = threading.Thread(target=print_output)
-            output_thread.daemon = True
-            output_thread.start()
-
             with output:
                 print("kohya-ss GUI has been started see logs at console")
                 print(proxy_url)
 
+            for i in process.stdout:
+
+                if "gradio.live" in i:
+                    with output:
+                        print(i.strip())
+                    continue
+
+                print(i.strip())
+
             # Wait for the subprocess to complete
             process.wait()
-            output_thread.join()
 
         except KeyboardInterrupt:
             process.terminate()
-            print("\n--Process terminated--")
+            with output:
+                print("\n--Process terminated--")
         finally:
             os.chdir("/notebooks/")  # Restore the working directory
 

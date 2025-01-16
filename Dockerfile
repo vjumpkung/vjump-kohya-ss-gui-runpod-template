@@ -46,5 +46,6 @@ WORKDIR /notebooks/
 
 EXPOSE 8888 6006 7860
 CMD jupyter lab --allow-root --ip=0.0.0.0 --no-browser --ServerApp.trust_xheaders=True --ServerApp.disable_check_xsrf=False \
-    --ServerApp.allow_remote_access=True --ServerApp.allow_origin='*' --ServerApp.allow_credentials=True --FileContentsManager.delete_to_trash=False \
-    --FileContentsManager.always_delete_dir=True --FileContentsManager.preferred_dir=/notebooks --ContentsManager.allow_hidden=True
+    --ServerApp.allow_remote_access=True --ServerApp.allow_origin='*' --ServerApp.allow_credentials=True \
+    --FileContentsManager.delete_to_trash=False --FileContentsManager.always_delete_dir=True --FileContentsManager.preferred_dir=/notebooks \
+    --ContentsManager.allow_hidden=True --ServerApp.token='' --ServerApp.password=''
