@@ -30,7 +30,7 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 
 WORKDIR /notebooks/
 
-RUN git clone --recursive https://github.com/vjumpkung/kohya_ss.git
+RUN git clone --recurse-submodules https://github.com/vjumpkung/kohya_ss.git
 
 WORKDIR /notebooks/kohya_ss/
 
@@ -38,7 +38,6 @@ WORKDIR /notebooks/kohya_ss/
 RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
     requests python-dotenv && \
-    pip install --no-cache-dir torch==2.5.0+cu124 torchvision==0.20.0+cu124 xformers==0.0.28.post2 --index-url https://download.pytorch.org/whl/cu124 &&\
     pip install --no-cache-dir -r requirements_runpod.txt && \
     pip cache purge
 

@@ -57,7 +57,7 @@ def setup():
         ("HUGGINGFACE_TOKEN", "Huggingface API Key", "Paste your API key here", ""),
     ]
 
-    save_button = widgets.Button(description="Save", button_style="success")
+    save_button = widgets.Button(description="Save", button_style="primary")
     output = widgets.Output()
 
     for key, input_label, placeholder, input_value in input_list:
@@ -170,7 +170,7 @@ def select_pretrained_model():
         checkboxes.append((item, checkbox))
         display(cb_item)
 
-    download_button = widgets.Button(description="Download", button_style="success")
+    download_button = widgets.Button(description="Download", button_style="primary")
     output = widgets.Output()
 
     def on_press(button):
@@ -212,7 +212,7 @@ def select_clip_vae_model():
         checkboxes.append((item, checkbox))
         display(cb_item)
 
-    download_button = widgets.Button(description="Download", button_style="success")
+    download_button = widgets.Button(description="Download", button_style="primary")
     output = widgets.Output()
 
     def on_press(button):
@@ -241,6 +241,9 @@ def launch_kohya_ss():
     output = widgets.Output()
 
     def run_gui(button):
+
+        os.chdir("/notebooks/")
+
         command = "python -u kohya_gui.py --noverify --headless --listen=0.0.0.0"
 
         if platform_id == "RUNPOD":
@@ -251,7 +254,7 @@ def launch_kohya_ss():
             proxy_url = f"using gradio share url"
             command += " --share"
 
-        os.chdir("kohya_ss/")  # Change to the kohya_ss directory
+        os.chdir("/notebooks/kohya_ss/")  # Change to the kohya_ss directory
 
         try:
             # Start the subprocess with unbuffered output
