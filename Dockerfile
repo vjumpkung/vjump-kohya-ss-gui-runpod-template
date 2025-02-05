@@ -12,7 +12,7 @@ COPY . /notebooks/
 # Update, install packages and clean up
 RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
 RUN apt-get update --yes && \
-    apt-get install --yes --no-install-recommends build-essential aria2 git git-lfs curl wget gcc g++ bash libgl1 software-properties-common openssh-server nginx google-perftools lsof && \
+    apt-get install --yes --no-install-recommends build-essential aria2 git git-lfs curl wget gcc g++ bash libgl1 software-properties-common openssh-server google-perftools && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update --yes && \
     apt-get install --yes --no-install-recommends "python${PYTHON_VERSION}" "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" "python${PYTHON_VERSION}-tk" && \
@@ -39,7 +39,7 @@ WORKDIR /notebooks/kohya_ss/
 # JupyterLab and other python packages
 RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
-    requests python-dotenv && \
+    requests python-dotenv nvitop gdown && \
     pip install --no-cache-dir -r requirements_runpod.txt && \
     pip cache purge
 
@@ -49,4 +49,4 @@ EXPOSE 8888 6006 7860
 CMD jupyter lab --allow-root --ip=0.0.0.0 --no-browser --ServerApp.trust_xheaders=True --ServerApp.disable_check_xsrf=False \
     --ServerApp.allow_remote_access=True --ServerApp.allow_origin='*' --ServerApp.allow_credentials=True \
     --FileContentsManager.delete_to_trash=False --FileContentsManager.always_delete_dir=True --FileContentsManager.preferred_dir=/notebooks \
-    --ContentsManager.allow_hidden=True --ServerApp.token='' --ServerApp.password=''
+    --ContentsManager.allow_hidden=True --LabServerApp.copy_absolute_path=True --ServerApp.token='' --ServerApp.password=''

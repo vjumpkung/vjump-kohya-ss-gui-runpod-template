@@ -173,3 +173,5 @@ cython_debug/
 
 model
 model/*
+lora_project
+lora_project/*
