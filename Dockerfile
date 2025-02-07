@@ -5,7 +5,7 @@ ARG CONTAINER_TIMEZONE=UTC
 
 WORKDIR /
 
-RUN mkdir -p /notebooks /notebooks/model/checkpoints/ /notebooks/model/unet/ /notebooks/model/clip/ /notebooks/model/vae/ /notebooks/lora_project/
+RUN mkdir -p /notebooks /notebooks/model/stable_diffusion_ckpt/ /notebooks/model/unet/ /notebooks/model/clip/ /notebooks/model/vae/ /notebooks/lora_project/
 
 COPY . /notebooks/
 
@@ -32,7 +32,7 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 
 WORKDIR /notebooks/
 
-RUN git clone --recurse-submodules https://github.com/vjumpkung/kohya_ss.git
+RUN git clone --recurse-submodules --depth 1 https://github.com/vjumpkung/kohya_ss.git
 
 WORKDIR /notebooks/kohya_ss/
 
@@ -46,7 +46,10 @@ RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
 WORKDIR /notebooks/
 
 EXPOSE 8888 6006 7860
-CMD jupyter lab --allow-root --ip=0.0.0.0 --no-browser --ServerApp.trust_xheaders=True --ServerApp.disable_check_xsrf=False \
-    --ServerApp.allow_remote_access=True --ServerApp.allow_origin='*' --ServerApp.allow_credentials=True \
-    --FileContentsManager.delete_to_trash=False --FileContentsManager.always_delete_dir=True --FileContentsManager.preferred_dir=/notebooks \
-    --ContentsManager.allow_hidden=True --LabServerApp.copy_absolute_path=True --ServerApp.token='' --ServerApp.password=''
+CMD ["jupyter", "lab", "--allow-root", "--ip=0.0.0.0", "--no-browser", \
+    "--ServerApp.trust_xheaders=True", "--ServerApp.disable_check_xsrf=False", \
+    "--ServerApp.allow_remote_access=True", "--ServerApp.allow_origin='*'", \
+    "--ServerApp.allow_credentials=True", "--FileContentsManager.delete_to_trash=False", \
+    "--FileContentsManager.always_delete_dir=True", "--FileContentsManager.preferred_dir=/notebooks", \
+    "--ContentsManager.allow_hidden=True", "--LabServerApp.copy_absolute_path=True", \
+    "--ServerApp.token=''", "--ServerApp.password=''"]

@@ -92,7 +92,7 @@ def download(name: str, url: str, type: str):
     filename = ""
 
     if type in ["sd15", "sdxl"]:
-        destination = "./model/checkpoints/"
+        destination = "./model/stable_diffusion_ckpt/"
     elif type in ["flux", "sd3"]:
         destination = "./model/unet/"
     elif type == "clip":
