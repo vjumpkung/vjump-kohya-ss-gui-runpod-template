@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Function to configure DNS settings
+configure_dns() {
+    echo "Configuring DNS settings..."
+    # Backup the current resolv.conf
+    cp /etc/resolv.conf /etc/resolv.conf.backup
+    # Use Google's public DNS servers
+    echo "nameserver 8.8.8.8
+nameserver 8.8.4.4" >/etc/resolv.conf
+    echo "DNS configuration updated."
+}
+
+# Function to start Jupyter Lab
 start_jupyter() {
     echo "Starting Jupyter Lab..."
     cd /notebooks/ &&
@@ -19,21 +31,27 @@ start_jupyter() {
             --LabServerApp.copy_absolute_path=True \
             --ServerApp.token='' \
             --ServerApp.password='' &>./jupyter.log &
-    echo "Jupyter Lab started"
+    echo "Jupyter Lab started."
 }
 
-# Export env vars
+# Function to export environment variables
 export_env_vars() {
     echo "Exporting environment variables..."
-    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment
+    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F= '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment
     echo 'source /etc/rp_environment' >>~/.bashrc
+    echo "Environment variables exported."
 }
 
+# Function to run the custom script
 run_custom_script() {
-    curl https://raw.githubusercontent.com/vjumpkung/vjump-runpod-notebooks-and-script/refs/heads/main/custom_script_kohya_ss.sh -sSf | bash -s -- -y
+    echo "Running custom script..."
+    curl -sSf https://raw.githubusercontent.com/vjumpkung/vjump-runpod-notebooks-and-script/refs/heads/main/custom_script_kohya_ss.sh | bash -s -- -y
+    echo "Custom script executed."
 }
 
+# Main execution sequence
 echo "Pod Started"
+configure_dns
 start_jupyter
 run_custom_script
 export_env_vars
