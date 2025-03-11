@@ -32,11 +32,11 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 
 WORKDIR /notebooks/
 
-RUN git clone --branch sd3-vjumpkung --single-branch --depth 1 https://github.com/vjumpkung/kohya_ss.git && \
-    cd kohya_ss && \
-    git submodule update --remote
+RUN git clone --branch sd3-vjumpkung --single-branch --depth 1 https://github.com/vjumpkung/kohya_ss.git
 
 WORKDIR /notebooks/kohya_ss/
+
+RUN git submodule update --remote
 
 # JupyterLab and other python packages
 RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
