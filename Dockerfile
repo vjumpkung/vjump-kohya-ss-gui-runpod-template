@@ -91,18 +91,6 @@ ARG UID
 RUN groupadd -g $UID $UID && \
     useradd -l -u $UID -g $UID -m -s /bin/sh -N $UID
 
-# Create directories with correct permissions
-RUN install -d -m 775 -o $UID -g 0 /dataset && \
-    install -d -m 775 -o $UID -g 0 /licenses && \
-    install -d -m 775 -o $UID -g 0 /app
-
-# Copy licenses (OpenShift Policy)
-COPY --link --chmod=775 LICENSE.md /licenses/LICENSE.md
-
-# Copy dependencies and code (and support arbitrary uid for OpenShift best practice)
-COPY --link --chown=$UID:0 --chmod=775 --from=build /root/.local /home/$UID/.local
-COPY --link --chown=$UID:0 --chmod=775 . /app
-
 ENV PATH="/usr/local/cuda/lib:/usr/local/cuda/lib64:/home/$UID/.local/bin:$PATH"
 ENV PYTHONPATH="${PYTHONPATH}:/home/$UID/.local/lib/python3.10/site-packages" 
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
@@ -114,7 +102,7 @@ ENV FORCE_COLOR="true"
 ENV COLUMNS="100"
 
 # 7860: Kohya GUI
-EXPOSE 7860
+EXPOSE 7860 6006 8888
 
 USER $UID
 
@@ -129,6 +117,11 @@ RUN pip cache purge
 WORKDIR /notebooks
 
 RUN git clone --branch sd3-vjumpkung --single-branch --depth 1 --recurse-submodules https://github.com/vjumpkung/kohya_ss.git
+
+# Set up Python and pip
+RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
+    rm /usr/bin/python3 && \
+    ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python3
 
 # # Use dumb-init as PID 1 to handle signals properly
 # ENTRYPOINT ["dumb-init", "--"]
