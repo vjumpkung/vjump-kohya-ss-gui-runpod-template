@@ -32,7 +32,9 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 
 WORKDIR /notebooks/
 
-RUN git clone --recurse-submodules --depth 1 https://github.com/vjumpkung/kohya_ss.git
+RUN git clone --branch sd3-vjumpkung --single-branch --depth 1 https://github.com/vjumpkung/kohya_ss.git && \
+    cd kohya_ss && \
+    git submodule update --remote
 
 WORKDIR /notebooks/kohya_ss/
 
