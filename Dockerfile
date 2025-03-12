@@ -30,7 +30,10 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py
 
-RUN git clone -b sd3-vjumpkung --recurse-submodules --depth 1 https://github.com/vjumpkung/kohya_ss.git
+RUN git clone https://github.com/vjumpkung/kohya_ss.git && \
+    cd kohya_ss && \
+    git checkout sd3-vjumpkung && \
+    git submodule update --init --recursive
 
 # JupyterLab and other python packages
 RUN cd kohya_ss && pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
