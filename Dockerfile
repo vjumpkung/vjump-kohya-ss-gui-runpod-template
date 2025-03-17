@@ -39,7 +39,7 @@ RUN git clone https://github.com/vjumpkung/kohya_ss.git && \
 RUN cd kohya_ss && pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
     requests python-dotenv nvitop gdown && \
-    pip install --no-cache-dir -r requirements_runpod.txt && \
+    pip install --no-cache-dir -r requirements_linux.txt && \
     pip cache purge
 
 
