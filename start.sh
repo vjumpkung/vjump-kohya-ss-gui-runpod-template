@@ -53,7 +53,7 @@ run_custom_script() {
 
     echo "Updating kohya-ss GUI"
 
-    cd kohya_ss && git pull --ff-only && python ./setup/validate_requirements.py --requirements requirements_linux.txt
+    cd kohya_ss && git pull --ff-only && python ./setup/validate_requirements.py --requirements requirements_runpod.txt
 
     echo "Update Completed"
     echo "Custom script executed."
