@@ -27,4 +27,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: vjump21848/vjump-kohya-ss-gui-template:test
+          tags: vjump21848/vjump-kohya-ss-gui-template:cu128
