@@ -53,7 +53,9 @@ RUN git clone https://github.com/vjumpkung/kohya_ss.git && \
 RUN cd kohya_ss && uv pip install --system jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
     requests python-dotenv nvitop gdown && \
-    uv pip install --system -r requirements_runpod.txt && \
+    uv pip install --system torch==2.7.0+cu128 torchvision==0.22.0+cu128 xformers==0.0.30 --extra-index-url https://download.pytorch.org/whl/cu128  && \
+    uv pip install --system bitsandbytes==0.45.5 tensorboard tensorflow wheel tensorrt &&\
+    uv pip install --system -r requirements.txt && \
     uv cache clean
 
 
