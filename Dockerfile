@@ -1,6 +1,6 @@
-FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+FROM nvidia/cuda:12.4.1-base-ubuntu20.04
 
-ARG PYTHON_VERSION="3.10"
+ARG PYTHON_VERSION="3.11"
 ARG CONTAINER_TIMEZONE=UTC 
 
 WORKDIR /
@@ -30,20 +30,37 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py
 
-WORKDIR /notebooks/
+# add uv
 
-RUN git clone --recurse-submodules --depth 1 https://github.com/vjumpkung/kohya_ss.git
+# The installer requires curl (and certificates) to download the release archive
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+
+# Download the latest installer
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+
+# Run the installer then remove it
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+# Ensure the installed binary is on the `PATH`
+ENV PATH="/root/.local/bin/:$PATH"
+
+# Clean up to reduce image size
+RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /notebooks
+
+RUN git clone --recurse-submodules --depth 1 https://github.com/bmaltais/kohya_ss.git
 
 WORKDIR /notebooks/kohya_ss/
 
 # JupyterLab and other python packages
-RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
+RUN uv pip install --system jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
     requests python-dotenv nvitop gdown && \
-    pip install --no-cache-dir -r requirements_runpod.txt && \
-    pip cache purge
+    uv pip install --system -r requirements_linux.txt && \
+    uv cache clean
 
-WORKDIR /notebooks/
+WORKDIR /notebooks
 
 EXPOSE 8888 6006 7860
 CMD ["jupyter", "lab", "--allow-root", "--ip=0.0.0.0", "--no-browser", \
